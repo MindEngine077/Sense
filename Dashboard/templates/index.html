@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <nav class="p-4 bg-gray-800 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">🚀 AI Dashboard met Supabase</h1>
+        <button onclick="toggleDarkMode()" class="px-4 py-2 bg-gray-700 rounded">🌙 Dark Mode</button>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-5">
+        
+        <!-- Web Crawler -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold">🕷️ Start Web Crawler</h2>
+            <input type="text" id="crawl-url" class="mt-2 p-2 bg-gray-700 rounded w-full" placeholder="Voer een website URL in">
+            <button onclick="runCrawler()" class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Start Crawl</button>
+            <p id="crawl-result" class="mt-2 text-green-400"></p>
+
+            <h3 class="mt-4 text-lg font-semibold">📊 Crawldata</h3>
+            <ul id="crawler-data" class="mt-3"></ul>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("bg-gray-900");
+            document.body.classList.toggle("bg-white");
+            document.body.classList.toggle("text-black");
+        }
+
+        function runCrawler() {
+            let url = document.getElementById("crawl-url").value || "https://news.ycombinator.com";
+            
+            fetch('/crawl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("crawl-result").innerText = data.message;
+                updateCrawlData();
+            });
+        }
+
+        function updateCrawlData() {
+            fetch('/crawldata')
+            .then(response => response.json())
+            .then(data => {
+                let list = document.getElementById("crawler-data");
+                list.innerHTML = "";
+                data.forEach(item => {
+                    let li = document.createElement("li");
+                    li.innerHTML = `<a href="${item.url}" target="_blank">${item.title}</a>`;
+                    list.appendChild(li);
+                });
+            });
+        }
+        
+        updateCrawlData();  // Laad crawldata bij openen pagina
+    </script>
+
+</body>
+</html>
